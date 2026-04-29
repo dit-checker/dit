@@ -463,7 +463,7 @@
                     </tr>
                     <tr>
                         <td class="rule-code">CA04</td>
-                        <td>RED X REQUIRES 'IAW', 'ACCORDANCE WITH', OR A VALID T.O. REFERENCE IN CORRECTIVE ACTION (00-20-1 PARA 4.5)</td>
+                        <td>RED X REQUIRES 'IAW', 'ACCORDANCE WITH', 'ETM', 'DMM', OR A VALID T.O. REFERENCE IN CORRECTIVE ACTION (00-20-1 PARA 4.5)</td>
                         <td class="rule-cond">Symbol is 'X'
                             <hr>CORRECTIVE_ACTION does not contain "IAW", "ACCORDANCE WITH"
                             <hr>CORRECTIVE_ACTION does not contain a valid T.O. Reference format
@@ -870,7 +870,7 @@
                             errors.push("CA03: CORRECTIVE ACTION READS 'NO CORRECTIVE NARRATIVE'");
                         }
                         // CA04 (New Rule)
-                        if (displaySymbol === 'X' && notInCA('IAW', 'ACCORDANCE WITH') && !toRegex.test(caText)) {
+                        if (displaySymbol === 'X' && notInCA('IAW', 'ACCORDANCE WITH', 'DMM', 'ETM') && !toRegex.test(caText)) {
                             errors.push("CA04: RED X REQUIRES 'IAW', 'ACCORDANCE WITH', OR A VALID T.O. REFERENCE IN CORRECTIVE ACTION (00-20-1 PARA 4.5)");
                         }
                         // CA02
