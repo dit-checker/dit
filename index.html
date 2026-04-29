@@ -1,3 +1,4 @@
+Put your HTML text here
 <!DOCTYPE html>
 <html lang="en">
 
@@ -794,16 +795,16 @@
                                         hmal = dataStr.substring(11, 14);
                                     }
                                 }
-                                const signOffMatch = ddrLine.match(/([A-Z0-9]{0,2})\s+([A-Z0-9]{2})\s+([X\-\/])\s+([A-Z]{2,}[0-9]*)\s+(2A\d{3})/i);
+                                const signOffMatch = ddrLine.match(/([A-Z0-9]{2})?\s*([A-Z0-9]{2})?\s*([X\-\/])\s+([A-Z]{2,}[0-9]*)\s+(2A\d{3})/i);
                                 if (signOffMatch) {
                                     ai = signOffMatch[1] ? signOffMatch[1].trim() || "-" : "-";
                                     correctedBy = signOffMatch[4].toUpperCase();
                                     if (symbol === "") symbol = signOffMatch[3].toUpperCase();
                                 } else {
-                                    const oldSignOffMatch = dataStr.match(/(.)(.)([X\-\/])([A-Z]{2,}[0-9]*)(2A\d{3})/i);
+                                    const oldSignOffMatch = dataStr.match(/^([A-Z0-9]{2})([X\-\/])([A-Z]{2,}[0-9]*)(2A\d{3})/i);
                                     if (oldSignOffMatch) {
-                                        ai = "-";
-                                        correctedBy = oldSignOffMatch[4].toUpperCase();
+                                        ai = oldSignOffMatch[1].toUpperCase(); // Capture ER correctly
+                                        correctedBy = oldSignOffMatch[3].toUpperCase();
                                         if (symbol === "") symbol = oldSignOffMatch[3].toUpperCase();
                                     }
                                 }
