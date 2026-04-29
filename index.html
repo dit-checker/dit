@@ -730,7 +730,7 @@
                     for (let w = 1; w < wceBlocks.length; w++) {
                         const wceText = wceBlocks[w];
 
-                        const parts = wceText.split(/DDR\s*TM\s*CP\s*WUC[\s\S]*?Supervisory\s*Reviewed/i);
+                        const parts = wceText.split(/DDR\s*TM\s*CP\s*(?:WUC|TCTO)[\s\S]*?Supervisory\s*Reviewed/i);
                         const wcePart = parts[0];
                         const ddrPart = parts.length > 1 ? parts[1] : "";
 
