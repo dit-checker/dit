@@ -811,7 +811,7 @@ if (isTCTO) {
 
 const caMatch = ddrPart.match(/Corrective Action:\s*([\s\S]*?)(?:Last\s*Changed:|WCE\s*PWC|Event:|$)/i);
 if (caMatch) caText = caMatch[1].replace(/\n/g, ' ').trim().toUpperCase();
-}
+}    
 
       
                   let displaySymbol = symbol === "" ? "CLR" : symbol;
