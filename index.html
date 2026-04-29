@@ -582,7 +582,7 @@
                         <td class="rule-code">AT16</td>
                         <td>ACTION TAKEN "G" IS FOR REPAIRS AND/OR REPLACEMENT OF MINOR PARTS</td>
                         <td class="rule-cond">AT is "G"
-                            <hr>CORRECTIVE_ACTION does not contain "REPAIR", "SWAPPED", "DRILL", "FABRICAT", "WELD", "ASSEMBL", "REPLACE", "MINOR PARTS", "CLAMPED", "LUBRIC", "MANUFACTURE", "SEAL", "PATCH", "MADE", "SOLDER", "RIG", "TRIM", "INSTALL", "SWAP", "PACK", "TIGHTEN", "SWEDGED", "CORRECT", "DRAIN", "GIG", "ATTACH", "SPLICE", "APPLIED", "STRAIGHTEN", "CHANGE", "PINNED", "COLD", "WIRE", "INTEGRATE", "CUT", "SWAGE", "SAFETIED", "FILL", "BLEND", "SCREW", "NUT", "BOLT", "WIRE", "COIL", "ERROR", "MX C/W", "R2", "REPAIRS", "REPAIRED", "SECURED", "WRAPPED", "WRAPED", "WRAP", "RETAPE"
+                            <hr>CORRECTIVE_ACTION does not contain "REPAIR", "SWAPPED", "DRILL", "FABRICAT", "WELD", "ASSEMBL", "REPLACE", "MINOR PARTS", "CLAMPED", "LUBRIC", "MANUFACTURE", "SEAL", "PATCH", "MADE", "SOLDER", "RIG", "TRIM", "INSTALL", "SWAP", "PACK", "TIGHTEN", "SWEDGED", "CORRECT", "DRAIN", "GIG", "ATTACH", "SPLICE", "APPLIED", "STRAIGHTEN", "CHANGE", "PINNED", "COLD", "WIRE", "INTEGRATE", "CUT", "SWAGE", "SAFETIED", "FILL", "BLEND", "SCREW", "NUT", "BOLT", "WIRE", "COIL", "ERROR", "MX C/W", "R2", "REPAIRS", "REPAIRED", "SECURED", "WRAPPED", "WRAPED", "WRAP"
                         </td>
                     </tr>
                     <tr>
@@ -771,32 +771,32 @@
 
                                 // New robust mapping targeting exact index alignment based on trimmed IMDS row
                                 if (rowParts.length >= 17) {
-                                    tm = rowParts[1] ? rowParts[1].trim() || "-" : "-";
+    tm = rowParts[1] ? rowParts[1].trim() || "-" : "-";
+    
+    // Detect TCTO shift
+    const isTCTO = tm === 'T';
+    wuc = isTCTO ? "-----" : (rowParts[3] ? rowParts[3].trim() || "-----" : "-----");
 
-                                    // Detect TCTO shift
-                                    const isTCTO = tm === 'T';
-                                    wuc = isTCTO ? "-----" : (rowParts[3] ? rowParts[3].trim() || "-----" : "-----");
-
-                                    if (isTCTO) {
-                                        // TCTO Mapping: Indices shift left by 2 after WUC/TCTO field
-                                        at = "-";
-                                        hmal = rowParts[4] ? rowParts[4].trim() || "---" : "---";
-                                        ai = rowParts[11] ? rowParts[11].trim() || "-" : "-"; // AI is at 11, not 13
-                                        let sym = rowParts[13] ? rowParts[13].trim().toUpperCase() : "";
-                                        if (sym !== "") symbol = sym;
-                                        let cBy = rowParts[14] ? rowParts[14].trim().toUpperCase() : "";
-                                        if (cBy !== "") correctedBy = cBy;
-                                    } else {
-                                        // Normal Mapping
-                                        at = rowParts[4] ? rowParts[4].trim() || "-" : "-";
-                                        hmal = rowParts[6] ? rowParts[6].trim() || "---" : "---";
-                                        ai = rowParts[13] ? rowParts[13].trim() || "-" : "-";
-                                        let sym = rowParts[15] ? rowParts[15].trim().toUpperCase() : "";
-                                        if (sym !== "") symbol = sym;
-                                        let cBy = rowParts[16] ? rowParts[16].trim().toUpperCase() : "";
-                                        if (cBy !== "") correctedBy = cBy;
-                                    }
-                                }
+    if (isTCTO) {
+        // TCTO Mapping: Indices shift left by 2 after WUC/TCTO field
+        at = "-"; 
+        hmal = rowParts[4] ? rowParts[4].trim() || "---" : "---";
+        ai = rowParts[11] ? rowParts[11].trim() || "-" : "-"; // AI is at 11, not 13
+        let sym = rowParts[13] ? rowParts[13].trim().toUpperCase() : "";
+        if (sym !== "") symbol = sym;
+        let cBy = rowParts[14] ? rowParts[14].trim().toUpperCase() : "";
+        if (cBy !== "") correctedBy = cBy;
+    } else {
+        // Normal Mapping
+        at = rowParts[4] ? rowParts[4].trim() || "-" : "-";
+        hmal = rowParts[6] ? rowParts[6].trim() || "---" : "---";
+        ai = rowParts[13] ? rowParts[13].trim() || "-" : "-";
+        let sym = rowParts[15] ? rowParts[15].trim().toUpperCase() : "";
+        if (sym !== "") symbol = sym;
+        let cBy = rowParts[16] ? rowParts[16].trim().toUpperCase() : "";
+        if (cBy !== "") correctedBy = cBy;
+    }
+}
 
                             } else {
                                 // Fallback for non-tabbed copy
@@ -815,12 +815,12 @@
                                     correctedBy = signOffMatch[4].toUpperCase();
                                     if (symbol === "") symbol = signOffMatch[3].toUpperCase();
                                 } else {
-                                    const oldSignOffMatch = dataStr.match(/^([A-Z0-9]{2})([X\-\/])([A-Z]{2,}[0-9]*)(2A\d{3})/i);
-                                    if (oldSignOffMatch) {
-                                        ai = oldSignOffMatch[1].toUpperCase();
-                                        correctedBy = oldSignOffMatch[3].toUpperCase();
-                                        if (symbol === "") symbol = oldSignOffMatch[2].toUpperCase(); // Corrected index
-                                    }
+    const oldSignOffMatch = dataStr.match(/^([A-Z0-9]{2})([X\-\/])([A-Z]{2,}[0-9]*)(2A\d{3})/i);
+if (oldSignOffMatch) {
+    ai = oldSignOffMatch[1].toUpperCase();
+    correctedBy = oldSignOffMatch[3].toUpperCase();
+    if (symbol === "") symbol = oldSignOffMatch[2].toUpperCase(); // Corrected index
+}
 
                                 }
                             }
@@ -878,9 +878,9 @@
                         const erExemptRegex = /\b(COULD NOT|CND)\b/i;
 
                         // CA01: Exempt TCTOs
-                        if (tm !== 'T' && (!caText || caText === "")) {
-                            errors.push("CA01: NO CORRECTIVE ACTION NARRATIVE FOR THIS DDR");
-                        }
+if (tm !== 'T' && (!caText || caText === "")) {
+    errors.push("CA01: NO CORRECTIVE ACTION NARRATIVE FOR THIS DDR");
+}
                         // CA03 (New Rule)
                         if (caText.includes('NO CORRECTIVE NARRATIVE')) {
                             errors.push("CA03: CORRECTIVE ACTION READS 'NO CORRECTIVE NARRATIVE'");
@@ -959,7 +959,7 @@
                                 errors.push("AT15: ACTION TAKEN 'S' IS FOR REMOVAL AND RE-INSTALLATION");
                             }
                             // AT16
-                            if (at === 'G' && notInCA('REPAIR', 'SWAPPED', 'DRILL', 'FABRICAT', 'WELD', 'ASSEMBL', 'REPLACE', 'MINOR PARTS', 'CLAMPED', 'LUBRIC', 'MANUFACTURE', 'SEAL', 'PATCH', 'MADE', 'SOLDER', 'RIG', 'TRIM', 'INSTALL', 'SWAP', 'PACK', 'TIGHTEN', 'SWEDGED', 'CORRECT', 'DRAIN', 'GIG', 'ATTACH', 'SPLICE', 'APPLIED', 'STRAIGHTEN', 'CHANGE', 'PINNED', 'COLD', 'WIRE', 'INTEGRATE', 'CUT', 'SWAGE', 'SAFETIED', 'FILL', 'BLEND', 'SCREW', 'NUT', 'BOLT', 'WIRE', 'COIL', 'ERROR', 'MX C/W', 'R2', 'REPAIRS', 'REPAIRED', 'SECURED', 'WRAPPED', 'WRAPED', 'WRAP', 'RETAPE')) {
+                            if (at === 'G' && notInCA('REPAIR', 'SWAPPED', 'DRILL', 'FABRICAT', 'WELD', 'ASSEMBL', 'REPLACE', 'MINOR PARTS', 'CLAMPED', 'LUBRIC', 'MANUFACTURE', 'SEAL', 'PATCH', 'MADE', 'SOLDER', 'RIG', 'TRIM', 'INSTALL', 'SWAP', 'PACK', 'TIGHTEN', 'SWEDGED', 'CORRECT', 'DRAIN', 'GIG', 'ATTACH', 'SPLICE', 'APPLIED', 'STRAIGHTEN', 'CHANGE', 'PINNED', 'COLD', 'WIRE', 'INTEGRATE', 'CUT', 'SWAGE', 'SAFETIED', 'FILL', 'BLEND', 'SCREW', 'NUT', 'BOLT', 'WIRE', 'COIL', 'ERROR', 'MX C/W', 'R2', 'REPAIRS', 'REPAIRED', 'SECURED', 'WRAPPED', 'WRAPED', 'WRAP')) {
                                 errors.push("AT16: ACTION TAKEN 'G' IS FOR REPAIRS AND/OR REPLACEMENT OF MINOR PARTS");
                             }
                             // AT17
