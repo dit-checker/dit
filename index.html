@@ -427,6 +427,7 @@
 
             <label for="ditInput" style="font-weight: 600;">Paste IMDS DIT History (Ctrl+V):</label>
             <textarea id="ditInput" placeholder="***Maintenance History For..."></textarea>
+            <div id="errorCountMessage" style="text-align: center; font-weight: bold; margin-top: 1rem; padding: 0.5rem; border-radius: 4px; transition: all 0.3s;"></div>
             <button class="btn" onclick="processAndRender()">Clean, Sort, & Analyze Data</button>
 
             <div id="reportPreview"></div>
@@ -629,6 +630,10 @@
             function processAndRender() {
                 const text = document.getElementById('ditInput').value;
                 const preview = document.getElementById('reportPreview');
+                const errorCountMessage = document.getElementById('errorCountMessage');
+
+                errorCountMessage.textContent = '';
+                errorCountMessage.style.backgroundColor = 'transparent';
 
                 if (!text || text.trim() === "") {
                     alert("Please paste data first.");
@@ -642,10 +647,11 @@
                     return;
                 }
 
-                // Error-First Sorting Logic
+                let totalErrors = 0;
                 jobs.forEach(job => {
                     let maxJobSeverity = 0;
                     job.wces.forEach(wce => {
+                        totalErrors += wce.errors.length;
                         let wceSeverity = wce.errors.length > 0 ? 1 : 0;
                         wce.severity = wceSeverity;
                         if (wceSeverity > maxJobSeverity) maxJobSeverity = wceSeverity;
@@ -655,6 +661,16 @@
                 });
 
                 jobs.sort((a, b) => b.severity - a.severity);
+
+                if (totalErrors === 0) {
+                    errorCountMessage.textContent = "NO DIT ERRORS";
+                    errorCountMessage.style.backgroundColor = '#dcfce7';
+                    errorCountMessage.style.color = '#15803d';
+                } else {
+                    errorCountMessage.textContent = `${totalErrors} DIT ERRORS FOUND`;
+                    errorCountMessage.style.backgroundColor = '#fee2e2';
+                    errorCountMessage.style.color = '#991b1b';
+                }
 
                 // Rendering Dashboard Output
                 let htmlOut = "";
@@ -771,32 +787,32 @@
 
                                 // New robust mapping targeting exact index alignment based on trimmed IMDS row
                                 if (rowParts.length >= 17) {
-    tm = rowParts[1] ? rowParts[1].trim() || "-" : "-";
-    
-    // Detect TCTO shift
-    const isTCTO = tm === 'T';
-    wuc = isTCTO ? "-----" : (rowParts[3] ? rowParts[3].trim() || "-----" : "-----");
+                                    tm = rowParts[1] ? rowParts[1].trim() || "-" : "-";
 
-    if (isTCTO) {
-        // TCTO Mapping: Indices shift left by 2 after WUC/TCTO field
-        at = "-"; 
-        hmal = rowParts[4] ? rowParts[4].trim() || "---" : "---";
-        ai = rowParts[11] ? rowParts[11].trim() || "-" : "-"; // AI is at 11, not 13
-        let sym = rowParts[13] ? rowParts[13].trim().toUpperCase() : "";
-        if (sym !== "") symbol = sym;
-        let cBy = rowParts[14] ? rowParts[14].trim().toUpperCase() : "";
-        if (cBy !== "") correctedBy = cBy;
-    } else {
-        // Normal Mapping
-        at = rowParts[4] ? rowParts[4].trim() || "-" : "-";
-        hmal = rowParts[6] ? rowParts[6].trim() || "---" : "---";
-        ai = rowParts[13] ? rowParts[13].trim() || "-" : "-";
-        let sym = rowParts[15] ? rowParts[15].trim().toUpperCase() : "";
-        if (sym !== "") symbol = sym;
-        let cBy = rowParts[16] ? rowParts[16].trim().toUpperCase() : "";
-        if (cBy !== "") correctedBy = cBy;
-    }
-}
+                                    // Detect TCTO shift
+                                    const isTCTO = tm === 'T';
+                                    wuc = isTCTO ? "-----" : (rowParts[3] ? rowParts[3].trim() || "-----" : "-----");
+
+                                    if (isTCTO) {
+                                        // TCTO Mapping: Indices shift left by 2 after WUC/TCTO field
+                                        at = "-";
+                                        hmal = rowParts[4] ? rowParts[4].trim() || "---" : "---";
+                                        ai = rowParts[11] ? rowParts[11].trim() || "-" : "-"; // AI is at 11, not 13
+                                        let sym = rowParts[13] ? rowParts[13].trim().toUpperCase() : "";
+                                        if (sym !== "") symbol = sym;
+                                        let cBy = rowParts[14] ? rowParts[14].trim().toUpperCase() : "";
+                                        if (cBy !== "") correctedBy = cBy;
+                                    } else {
+                                        // Normal Mapping
+                                        at = rowParts[4] ? rowParts[4].trim() || "-" : "-";
+                                        hmal = rowParts[6] ? rowParts[6].trim() || "---" : "---";
+                                        ai = rowParts[13] ? rowParts[13].trim() || "-" : "-";
+                                        let sym = rowParts[15] ? rowParts[15].trim().toUpperCase() : "";
+                                        if (sym !== "") symbol = sym;
+                                        let cBy = rowParts[16] ? rowParts[16].trim().toUpperCase() : "";
+                                        if (cBy !== "") correctedBy = cBy;
+                                    }
+                                }
 
                             } else {
                                 // Fallback for non-tabbed copy
@@ -815,12 +831,12 @@
                                     correctedBy = signOffMatch[4].toUpperCase();
                                     if (symbol === "") symbol = signOffMatch[3].toUpperCase();
                                 } else {
-    const oldSignOffMatch = dataStr.match(/^([A-Z0-9]{2})([X\-\/])([A-Z]{2,}[0-9]*)(2A\d{3})/i);
-if (oldSignOffMatch) {
-    ai = oldSignOffMatch[1].toUpperCase();
-    correctedBy = oldSignOffMatch[3].toUpperCase();
-    if (symbol === "") symbol = oldSignOffMatch[2].toUpperCase(); // Corrected index
-}
+                                    const oldSignOffMatch = dataStr.match(/^([A-Z0-9]{2})([X\-\/])([A-Z]{2,}[0-9]*)(2A\d{3})/i);
+                                    if (oldSignOffMatch) {
+                                        ai = oldSignOffMatch[1].toUpperCase();
+                                        correctedBy = oldSignOffMatch[3].toUpperCase();
+                                        if (symbol === "") symbol = oldSignOffMatch[2].toUpperCase(); // Corrected index
+                                    }
 
                                 }
                             }
@@ -878,9 +894,9 @@ if (oldSignOffMatch) {
                         const erExemptRegex = /\b(COULD NOT|CND)\b/i;
 
                         // CA01: Exempt TCTOs
-if (tm !== 'T' && (!caText || caText === "")) {
-    errors.push("CA01: NO CORRECTIVE ACTION NARRATIVE FOR THIS DDR");
-}
+                        if (tm !== 'T' && (!caText || caText === "")) {
+                            errors.push("CA01: NO CORRECTIVE ACTION NARRATIVE FOR THIS DDR");
+                        }
                         // CA03 (New Rule)
                         if (caText.includes('NO CORRECTIVE NARRATIVE')) {
                             errors.push("CA03: CORRECTIVE ACTION READS 'NO CORRECTIVE NARRATIVE'");
