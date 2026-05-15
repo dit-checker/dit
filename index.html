@@ -385,6 +385,34 @@
         .error-banner li {
             margin-bottom: 0.1rem;
         }
+        
+        /* Non-Error Toggle System */
+        .toggle-btn {
+            background-color: #f8fafc;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin: 0 1.5rem 1.5rem 1.5rem;
+            display: inline-block;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn:hover {
+            background-color: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .clean-wces-container {
+            display: none;
+        }
+
+        .clean-wces-container.expanded {
+            display: block;
+        }
 
         /* Site Footer */
         .site-footer {
@@ -626,6 +654,57 @@
                     '"': '&quot;'
                 } [tag] || tag));
             }
+            
+            function toggleCleanWCEs(containerId, btnId) {
+                const container = document.getElementById(containerId);
+                const btn = document.getElementById(btnId);
+                if (container.classList.contains('expanded')) {
+                    container.classList.remove('expanded');
+                    btn.innerHTML = btn.innerHTML.replace('🔼 Hide', '🔽 View');
+                } else {
+                    container.classList.add('expanded');
+                    btn.innerHTML = btn.innerHTML.replace('🔽 View', '🔼 Hide');
+                }
+            }
+            
+            function renderWCE(wce) {
+                let cardClass = "wce-card" + (wce.severity === 1 ? " error" : "");
+                let htmlOut = `<div class="${cardClass}">`;
+
+                if (wce.errors.length > 0) {
+                    htmlOut += `<div class="error-banner">❌ DIT ERRORS FLAGGED:<ul>`;
+                    wce.errors.forEach(err => htmlOut += `<li>${escapeHTML(err)}</li>`);
+                    htmlOut += `</ul></div>`;
+                }
+
+                htmlOut += `
+                <div class="data-grid">
+                    <div class="data-item"><span class="data-label">WCE</span>${escapeHTML(wce.wceNum)}</div>
+                    <div class="data-item"><span class="data-label">TM</span>${escapeHTML(wce.tm)}</div>
+                    <div class="data-item"><span class="data-label">AT</span>${escapeHTML(wce.at)}</div>
+                    <div class="data-item"><span class="data-label">HMAL</span>${escapeHTML(wce.hmal)}</div>
+                    <div class="data-item"><span class="data-label">WUC</span>${escapeHTML(wce.wuc)}</div>
+                    <div class="data-item"><span class="data-label">AI</span>${escapeHTML(wce.ai)}</div>
+                </div>
+            `;
+
+                let symClass = "symbol-badge";
+                if (wce.symbol === 'X') symClass += " symbol-red-x";
+                else if (wce.symbol === '-' || wce.symbol === '/') symClass += " symbol-orange";
+                else symClass += " symbol-none";
+
+                htmlOut += `
+                <div class="symbol-box">
+                    <div class="${symClass}">${escapeHTML(wce.symbol)}</div> 
+                    ${wce.signOffText}
+                </div>
+            `;
+
+                htmlOut += `<div class="ca-box"><strong>Corrective Action:</strong><br>${escapeHTML(wce.ca)}</div>`;
+                htmlOut += `</div>`;
+                
+                return htmlOut;
+            }
 
             function processAndRender() {
                 const text = document.getElementById('ditInput').value;
@@ -675,48 +754,35 @@
                 // Rendering Dashboard Output
                 let htmlOut = "";
 
-                jobs.forEach(job => {
+                jobs.forEach((job, jobIndex) => {
                     let jcnClass = "jcn-block" + (job.severity === 1 ? " has-error" : "");
                     htmlOut += `<div class="${jcnClass}">`;
                     htmlOut += `<div class="jcn-header"><span>JCN: ${escapeHTML(job.jcn)}</span></div>`;
                     htmlOut += `<div class="discrepancy-box"><strong>Discrepancy:</strong> <br>${escapeHTML(job.discrepancy)}</div>`;
+                    
+                    let errorWces = job.wces.filter(w => w.severity === 1);
+                    let cleanWces = job.wces.filter(w => w.severity === 0);
 
-                    job.wces.forEach(wce => {
-                        let cardClass = "wce-card" + (wce.severity === 1 ? " error" : "");
-                        htmlOut += `<div class="${cardClass}">`;
-
-                        if (wce.errors.length > 0) {
-                            htmlOut += `<div class="error-banner">❌ DIT ERRORS FLAGGED:<ul>`;
-                            wce.errors.forEach(err => htmlOut += `<li>${escapeHTML(err)}</li>`);
-                            htmlOut += `</ul></div>`;
-                        }
-
-                        htmlOut += `
-                    <div class="data-grid">
-                        <div class="data-item"><span class="data-label">WCE</span>${escapeHTML(wce.wceNum)}</div>
-                        <div class="data-item"><span class="data-label">TM</span>${escapeHTML(wce.tm)}</div>
-                        <div class="data-item"><span class="data-label">AT</span>${escapeHTML(wce.at)}</div>
-                        <div class="data-item"><span class="data-label">HMAL</span>${escapeHTML(wce.hmal)}</div>
-                        <div class="data-item"><span class="data-label">WUC</span>${escapeHTML(wce.wuc)}</div>
-                        <div class="data-item"><span class="data-label">AI</span>${escapeHTML(wce.ai)}</div>
-                    </div>
-                `;
-
-                        let symClass = "symbol-badge";
-                        if (wce.symbol === 'X') symClass += " symbol-red-x";
-                        else if (wce.symbol === '-' || wce.symbol === '/') symClass += " symbol-orange";
-                        else symClass += " symbol-none";
-
-                        htmlOut += `
-                    <div class="symbol-box">
-                        <div class="${symClass}">${escapeHTML(wce.symbol)}</div> 
-                        ${wce.signOffText}
-                    </div>
-                `;
-
-                        htmlOut += `<div class="ca-box"><strong>Corrective Action:</strong><br>${escapeHTML(wce.ca)}</div>`;
-                        htmlOut += `</div>`;
+                    // Render Error WCEs
+                    errorWces.forEach(wce => {
+                        htmlOut += renderWCE(wce);
                     });
+                    
+                    // Render Clean WCEs in a collapsible container if there are any
+                    if (cleanWces.length > 0) {
+                        let btnId = `btn-${jobIndex}`;
+                        let containerId = `clean-${jobIndex}`;
+                        
+                        htmlOut += `<button class="toggle-btn" id="${btnId}" onclick="toggleCleanWCEs('${containerId}', '${btnId}')">🔽 View ${cleanWces.length} Non-Error WCE(s)</button>`;
+                        htmlOut += `<div id="${containerId}" class="clean-wces-container">`;
+                        
+                        cleanWces.forEach(wce => {
+                            htmlOut += renderWCE(wce);
+                        });
+                        
+                        htmlOut += `</div>`;
+                    }
+
                     htmlOut += `</div>`;
                 });
 
